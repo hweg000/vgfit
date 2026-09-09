@@ -3,6 +3,21 @@
 Historial de qué se hizo en el proyecto y por qué. Ver [AGENTS.md](AGENTS.md) para las reglas de
 cómo mantener este archivo.
 
+## 2026-09-09 (segunda sesión) — Probado en vivo
+
+- Se montó y corrió el proyecto por primera vez en una máquina real (XAMPP en Windows):
+  bot creado en @BotFather (`@fitVG_bot`, privacidad en Disable), grupo de Telegram "VG DIET"
+  (`GROUP_CHAT_ID` negativo), base `tel_dieta` creada con `server/schema.sql` sobre MariaDB 10.4
+  de XAMPP (root sin contraseña), `server/.env` y `web/.env` llenados.
+- Flujo completo verificado end-to-end: al mandar una foto con caption al grupo, el bot la
+  descarga a `../uploads`, crea el usuario y registra la comida en `meals`; el feed de la Mini App
+  (`http://localhost:5173`, backend en `:3001`) la muestra y la votación "sana"/"no sana" se
+  guarda en `votes` usando el bypass `ALLOW_DEV_AUTH=true`.
+- Nota Telegraf v4: la promesa de `bot.launch()` no resuelve hasta que el bot se detiene, por eso
+  el log "Bot de Telegram corriendo (polling)" nunca aparece aunque el bot sí esté activo.
+- Pendiente: probarlo como Mini App real dentro de Telegram (exponer `web/` con HTTPS vía ngrok y
+  registrar la URL como Menu Button en BotFather).
+
 ## 2026-09-09
 
 - Se creó el proyecto desde cero: bot de Telegram (Telegraf, modo polling) + API Express + MySQL
