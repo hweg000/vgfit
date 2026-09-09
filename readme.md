@@ -10,7 +10,27 @@ qué y votar en grupo si algo fue "sano" o no.
 - `web/` — React (Vite), la Mini App que se abre dentro de Telegram (o en el navegador para
   pruebas locales).
 
-Ver el detalle completo en el plan de diseño original si hace falta contexto.
+### Decisiones y por qué
+
+- **Telegram y no WhatsApp**: WhatsApp no tiene una Bot API gratuita; Telegram sí, y además deja
+  identificar a cada usuario sin pedirle login aparte.
+- **Mini App (webview de Telegram) en vez de una PWA independiente**: reutiliza la identidad de
+  Telegram (`initData` firmado) para saber quién vota, sin construir auth ni hosting propios.
+- **Bot y API en un solo proceso Node** (`server/src/index.js`): es una app para un grupo de
+  amigos, no un producto que necesite escalar servicios por separado; comparten el mismo pool de
+  MySQL y así se corre todo con un solo `npm run dev`.
+- **Bot en modo polling, no webhook**: el polling no necesita una URL pública con HTTPS, ideal
+  para desarrollo 100% local. Si el proyecto se despliega a un servidor con dominio propio, se
+  puede migrar a webhook más adelante.
+- **MySQL vía XAMPP local**: por ahora todo corre en la máquina del dueño del proyecto, no hay
+  servidor de base de datos remoto.
+- **Auth con bypass de desarrollo** (`server/src/middleware/telegramAuth.js`): el voto valida el
+  `initData` de Telegram con HMAC usando el `BOT_TOKEN`; para poder probar el front en un
+  navegador normal (fuera de Telegram) durante desarrollo, hay un bypass activado con
+  `ALLOW_DEV_AUTH=true` que **no debe quedar activo si el proyecto se expone a internet**.
+- **Fotos guardadas en disco local** (`/uploads`, fuera del repo): simple para una app de un solo
+  servidor; si se despliega en algo con almacenamiento efímero habría que migrar a un storage
+  externo (S3, R2, etc.).
 
 ## 1. Crear el bot en Telegram
 
@@ -80,6 +100,13 @@ desarrollo (`ALLOW_DEV_AUTH=true` en el backend). Para probarlo como Mini App re
 Telegram vas a necesitar exponer `web` con una URL HTTPS pública (ej. ngrok) y registrarla como
 Menu Button del bot en BotFather — eso es un paso posterior, no hace falta para probar todo el
 flujo en local primero.
+
+## Historial y continuidad
+
+Este proyecto puede ser tocado por distintas IAs o personas en distintas máquinas. El contexto y
+las decisiones tomadas viven en el propio repo, no en la memoria local de ninguna herramienta —
+ver [AGENTS.md](AGENTS.md) (instrucciones para IAs que trabajen aquí) y
+[CHANGELOG.md](CHANGELOG.md) (historial de qué se hizo y por qué).
 
 ## Funcionalidad incluida
 
